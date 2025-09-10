@@ -108,7 +108,8 @@ const QuestionForm = () => {
                     id="question"
                     value={question.question}
                     readOnly
-                    className="mt-2 min-h-[80px] bg-muted/50 text-foreground resize-none cursor-default"
+                    disabled
+                    className="mt-2 min-h-[80px] bg-muted text-muted-foreground resize-none cursor-not-allowed opacity-60"
                   />
                 </div>
 
@@ -120,7 +121,8 @@ const QuestionForm = () => {
                     id="subject"
                     value={question.subject}
                     readOnly
-                    className="mt-2 bg-muted/50 text-foreground cursor-default"
+                    disabled
+                    className="mt-2 bg-muted text-muted-foreground cursor-not-allowed opacity-60"
                   />
                 </div>
 
