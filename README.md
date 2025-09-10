@@ -1,73 +1,150 @@
-# Welcome to your Lovable project
+# Question Bank CSV Viewer
 
-## Project info
+A modern React application for browsing and managing large CSV datasets with pagination and form functionality. Built with React, TypeScript, Vite, and Tailwind CSS.
 
-**URL**: https://lovable.dev/projects/043b3efa-2b65-4842-8524-110c176ea3c5
+## Features
 
-## How can I edit this code?
+- ✨ **CSV Data Loading**: Parse and display large CSV files (tested with 200k+ rows)
+- 📄 **Pagination**: Efficient pagination showing 15 questions per page
+- 🎯 **Question Details**: Click any question to add related topics
+- 💾 **Data Persistence**: Save related topics via FastAPI backend
+- 🎨 **Modern UI**: Clean, professional design with Tailwind CSS
+- 📱 **Responsive**: Works perfectly on desktop and mobile
+- 🚀 **Performance**: Optimized for large datasets with smooth navigation
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+**Frontend:**
+- React 18 with TypeScript
+- Vite for fast development and building
+- Tailwind CSS for styling
+- Shadcn/ui for component library
+- React Router for navigation
+- PapaParse for CSV parsing
+- Axios for API calls
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/043b3efa-2b65-4842-8524-110c176ea3c5) and start prompting.
+**Backend:**
+- FastAPI with Python
+- Pydantic for data validation
+- JSON file storage
+- CORS enabled for frontend communication
 
-Changes made via Lovable will be committed automatically to this repo.
+## Quick Start
 
-**Use your preferred IDE**
+### Frontend Setup
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+2. **Start development server:**
+   ```bash
+   npm run dev
+   ```
+   
+   The app will be available at http://localhost:8080
 
-Follow these steps:
+### Backend Setup
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. **Navigate to backend directory:**
+   ```bash
+   cd backend
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. **Install Python dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+3. **Start the FastAPI server:**
+   ```bash
+   python main.py
+   ```
+   
+   The API will be available at:
+   - API: http://localhost:8000
+   - API Documentation: http://localhost:8000/docs
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+## Usage
+
+1. **Browse Questions**: The home page displays questions with pagination
+2. **View Details**: Click any question to open the form page
+3. **Add Related Topics**: Enter relevant topics and save
+4. **Navigate**: Use pagination controls to browse through all questions
+
+## CSV Format
+
+The CSV file should have the following columns:
+- `id`: Unique identifier for each question
+- `question`: The question text
+- `subject`: Subject category
+
+Example:
+```csv
+id,question,subject
+1,"What is the capital of France?","Geography"
+2,"How do you declare a variable in JavaScript?","Programming"
 ```
 
-**Edit a file directly in GitHub**
+## API Endpoints
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- `POST /save` - Save question with related topics
+- `GET /submissions` - Retrieve all saved submissions
+- `GET /submissions/{id}` - Get specific submission by ID
 
-**Use GitHub Codespaces**
+## Project Structure
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+src/
+├── components/
+│   ├── Home.tsx          # Main question listing page
+│   ├── QuestionForm.tsx  # Question detail form
+│   └── ui/              # Shadcn UI components
+├── types/
+│   └── Question.ts       # TypeScript interfaces
+├── hooks/               # Custom React hooks
+├── lib/                 # Utility functions
+└── pages/               # Page components
 
-## What technologies are used for this project?
+backend/
+├── main.py              # FastAPI application
+├── requirements.txt     # Python dependencies
+└── data/               # JSON data storage
+```
 
-This project is built with:
+## Development
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+**Available Scripts:**
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-## How can I deploy this project?
+**Backend Development:**
+- The FastAPI server includes hot reload
+- API documentation available at `/docs`
+- Data stored in `backend/data/submissions.json`
 
-Simply open [Lovable](https://lovable.dev/projects/043b3efa-2b65-4842-8524-110c176ea3c5) and click on Share -> Publish.
+## Deployment
 
-## Can I connect a custom domain to my Lovable project?
+**Frontend:**
+Simply open [Lovable](https://lovable.dev/projects/043b3efa-2b65-4842-8524-110c176ea3c5) and click on Share → Publish.
 
-Yes, you can!
+**Backend:**
+Deploy the FastAPI backend to your preferred hosting service (Heroku, Railway, DigitalOcean, etc.).
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Performance Notes
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- Optimized for large CSV files (200k+ rows)
+- Client-side pagination for smooth navigation
+- Lazy loading and efficient rendering
+- Minimal API calls for better performance
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
