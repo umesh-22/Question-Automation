@@ -17,6 +17,8 @@ const QuestionForm = () => {
   const { toast } = useToast();
   
   const question: Question = location.state?.question;
+  const [questionText, setQuestionText] = useState(question?.question || '');
+  const [subject, setSubject] = useState(question?.subject || '');
   const [relatedTopics, setRelatedTopics] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -51,8 +53,8 @@ const QuestionForm = () => {
     try {
       const submission: QuestionSubmission = {
         id: question.id,
-        question: question.question,
-        subject: question.subject,
+        question: questionText.trim(),
+        subject: subject.trim(),
         relatedTopics: relatedTopics.trim()
       };
 
@@ -106,10 +108,10 @@ const QuestionForm = () => {
                   </Label>
                   <Textarea
                     id="question"
-                    value={question.question}
-                    readOnly
-                    disabled
-                    className="mt-2 min-h-[80px] bg-muted text-muted-foreground resize-none cursor-not-allowed opacity-60"
+                    value={questionText}
+                    onChange={(e) => setQuestionText(e.target.value)}
+                    className="mt-2 min-h-[80px] resize-none"
+                    required
                   />
                 </div>
 
@@ -119,10 +121,10 @@ const QuestionForm = () => {
                   </Label>
                   <Input
                     id="subject"
-                    value={question.subject}
-                    readOnly
-                    disabled
-                    className="mt-2 bg-muted text-muted-foreground cursor-not-allowed opacity-60"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    className="mt-2"
+                    required
                   />
                 </div>
 
