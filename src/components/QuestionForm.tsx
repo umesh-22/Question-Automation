@@ -112,7 +112,11 @@ const QuestionForm = () => {
                     id="question"
                     value={questionText}
                     onChange={(e) => setQuestionText(e.target.value)}
+<<<<<<< HEAD
                     className="mt-2 min-h-[150px] resize-none"
+=======
+                    className="mt-2 min-h-[80px] resize-none whitespace-pre-line"
+>>>>>>> db60b91a989176124d877d66207a1706d6915137
                     required
                   />
                 </div>

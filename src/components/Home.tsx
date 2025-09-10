@@ -82,6 +82,7 @@ const Home = () => {
         Papa.parse(csvText, {
           header: true,
           skipEmptyLines: true,
+<<<<<<< HEAD
           worker: true,
           step: (row) => {
             const data = row.data;
@@ -92,6 +93,16 @@ const Home = () => {
                 subject: cleanText(data.subject),
               });
             }
+=======
+          complete: (results) => {
+            const parsedQuestions = results.data.map((row: any, index: number) => ({
+              id: parseInt(row.id) || index + 1,
+              question: (row.question || '').replace(/\\n/g, '\n'),
+              subject: row.subject || ''
+            }));
+            setQuestions(parsedQuestions);
+            setLoading(false);
+>>>>>>> db60b91a989176124d877d66207a1706d6915137
           },
           complete: async () => {
             // Fallback: CSV without headers
