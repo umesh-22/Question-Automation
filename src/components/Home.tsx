@@ -1,12 +1,55 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Papa from 'papaparse';
+import localforage from 'localforage';
 import { Question } from '@/types/Question';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, FileText } from 'lucide-react';
 
 const QUESTIONS_PER_PAGE = 15;
+
+function cleanText(text: string): string {
+  if (!text) return '';
+
+  let cleaned = text;
+
+  // 1. Replace escaped newlines with space
+  cleaned = cleaned.replace(/\\n/g, ' ');
+
+  // 2. Remove \( ... \) and \[ ... \] (LaTeX math delimiters)
+  cleaned = cleaned.replace(/\\\(|\\\)|\\\[|\\\]/g, '');
+
+  // 3. Remove LaTeX commands with braces (\mathbf{}, \boldsymbol{}, \mathrm{}, \operatorname{}, \text{})
+  cleaned = cleaned.replace(/\\(mathbf|boldsymbol|mathrm|operatorname|text)\s*\{([^{}]*)\}/g, '$2');
+
+  // 4. Remove LaTeX subscripts and superscripts _{...} ^{...}, keep content
+  cleaned = cleaned.replace(/[_^]\{([^{}]*)\}/g, '$1');
+
+  // 5. Remove leftover _ or ^ characters
+  cleaned = cleaned.replace(/[_^]/g, '');
+
+  // 6. Remove single LaTeX commands like \ln, \cdot, \rightarrow
+  cleaned = cleaned.replace(/\\[a-zA-Z]+/g, '');
+
+  // 7. Remove empty parentheses
+  cleaned = cleaned.replace(/\([ ]*\)/g, '');
+
+  // 8. Collapse multiple spaces into one
+  cleaned = cleaned.replace(/\s+/g, ' ');
+
+  // 9. Remove spaces before punctuation
+  cleaned = cleaned.replace(/\s+([?.!,])/g, '$1');
+
+  // 10. Trim start and end
+  cleaned = cleaned.trim();
+
+  return cleaned;
+}
+
+
+
+
 
 const Home = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -18,27 +61,76 @@ const Home = () => {
   useEffect(() => {
     const loadQuestions = async () => {
       try {
+        setLoading(true);
+
+        // ✅ Try to get cached data from IndexedDB
+        const cachedData = await localforage.getItem<Question[]>('questions');
+        if (cachedData && cachedData.length > 0) {
+          setQuestions(cachedData);
+          setLoading(false);
+          return;
+        }
+
+        // Fetch CSV from public folder
         const response = await fetch('/questions.csv');
+        if (!response.ok) throw new Error('CSV file not found');
         const csvText = await response.text();
-        
+
+        let parsedQuestions: Question[] = [];
+
+        // ✅ Parse CSV in a worker thread to avoid blocking UI
         Papa.parse(csvText, {
           header: true,
           skipEmptyLines: true,
-          complete: (results) => {
-            const parsedQuestions = results.data.map((row: any, index: number) => ({
-              id: parseInt(row.id) || index + 1,
-              question: row.question || '',
-              subject: row.subject || ''
-            }));
-            setQuestions(parsedQuestions);
-            setLoading(false);
+          worker: true,
+          step: (row) => {
+            const data = row.data;
+            if (data.question && data.subject) {
+              parsedQuestions.push({
+                id: data.id ? parseInt(data.id, 10) : parsedQuestions.length + 1,
+                question: cleanText(data.question),
+                subject: cleanText(data.subject),
+              });
+            }
           },
-          error: (error) => {
+          complete: async () => {
+            // Fallback: CSV without headers
+            if (parsedQuestions.length === 0) {
+              Papa.parse(csvText, {
+                header: false,
+                skipEmptyLines: true,
+                worker: true,
+                step: (row) => {
+                  const data = row.data;
+                  parsedQuestions.push({
+                    id: parsedQuestions.length + 1,
+                    question: cleanText(data[0] || ''),
+                    subject: cleanText(data[1] || 'Unknown'),
+                  });
+                },
+                complete: async () => {
+                  setQuestions(parsedQuestions);
+                  await localforage.setItem('questions', parsedQuestions);
+                  setLoading(false);
+                },
+                error: () => {
+                  setError('Failed to parse CSV file');
+                  setLoading(false);
+                },
+              });
+            } else {
+              setQuestions(parsedQuestions);
+              await localforage.setItem('questions', parsedQuestions);
+              setLoading(false);
+            }
+          },
+          error: () => {
             setError('Failed to parse CSV file');
             setLoading(false);
-          }
+          },
         });
       } catch (err) {
+        console.error(err);
         setError('Failed to load questions');
         setLoading(false);
       }
@@ -58,12 +150,14 @@ const Home = () => {
   const goToNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const goToPrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -102,9 +196,9 @@ const Home = () => {
         </div>
 
         <div className="grid gap-4 mb-8">
-          {currentQuestions.map((question, index) => (
-            <Card 
-              key={question.id} 
+          {currentQuestions.map((question) => (
+            <Card
+              key={question.id}
               className="cursor-pointer hover:shadow-medium transition-all duration-200 hover:-translate-y-1 bg-card/80 backdrop-blur-sm border-border/50"
               onClick={() => handleQuestionClick(question)}
             >
@@ -119,7 +213,7 @@ const Home = () => {
                         #{question.id}
                       </span>
                     </div>
-                    <p className="text-foreground font-medium leading-relaxed">
+                    <p className="text-foreground font-medium leading-relaxed whitespace-pre-line">
                       {question.question}
                     </p>
                   </div>
@@ -141,7 +235,7 @@ const Home = () => {
               <ChevronLeft className="h-4 w-4" />
               Previous
             </Button>
-            
+
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">
                 Page {currentPage} of {totalPages}

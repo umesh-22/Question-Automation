@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Question, QuestionSubmission } from '@/types/Question';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Save, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const QuestionForm = () => {
@@ -17,9 +17,11 @@ const QuestionForm = () => {
   const { toast } = useToast();
   
   const question: Question = location.state?.question;
+
+  // ✅ Initialize relatedTopics with existing value if available
   const [questionText, setQuestionText] = useState(question?.question || '');
   const [subject, setSubject] = useState(question?.subject || '');
-  const [relatedTopics, setRelatedTopics] = useState('');
+  const [relatedTopics, setRelatedTopics] = useState(question?.relatedTopics || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!question) {
@@ -38,7 +40,7 @@ const QuestionForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!relatedTopics.trim()) {
       toast({
         title: "Validation Error",
@@ -55,17 +57,17 @@ const QuestionForm = () => {
         id: question.id,
         question: questionText.trim(),
         subject: subject.trim(),
-        relatedTopics: relatedTopics.trim()
+        relatedTopics: relatedTopics.trim(),
       };
-
+      console.log('Submitting:', submission);
       // Replace with your actual API endpoint
       await axios.post('http://localhost:8000/save', submission);
-      
+
       toast({
         title: "Success!",
         description: "Related topics saved successfully.",
       });
-      
+
       navigate('/');
     } catch (error) {
       toast({
@@ -110,7 +112,7 @@ const QuestionForm = () => {
                     id="question"
                     value={questionText}
                     onChange={(e) => setQuestionText(e.target.value)}
-                    className="mt-2 min-h-[80px] resize-none"
+                    className="mt-2 min-h-[150px] resize-none"
                     required
                   />
                 </div>
@@ -140,9 +142,9 @@ const QuestionForm = () => {
                     className="mt-2 min-h-[120px] resize-none"
                     required
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
+                  {/* <p className="text-xs text-muted-foreground mt-1">
                     Examples: algorithms, data structures, complexity analysis
-                  </p>
+                  </p> */}
                 </div>
 
                 <div className="flex gap-3 pt-4">
@@ -159,7 +161,7 @@ const QuestionForm = () => {
                     ) : (
                       <div className="flex items-center gap-2">
                         <Save className="h-4 w-4" />
-                        Save Related Topics
+                        Save 
                       </div>
                     )}
                   </Button>
