@@ -27,7 +27,7 @@ const Home = () => {
           complete: (results) => {
             const parsedQuestions = results.data.map((row: any, index: number) => ({
               id: parseInt(row.id) || index + 1,
-              question: row.question || '',
+              question: (row.question || '').replace(/\\n/g, '\n'),
               subject: row.subject || ''
             }));
             setQuestions(parsedQuestions);
@@ -119,7 +119,7 @@ const Home = () => {
                         #{question.id}
                       </span>
                     </div>
-                    <p className="text-foreground font-medium leading-relaxed">
+                    <p className="text-foreground font-medium leading-relaxed whitespace-pre-line">
                       {question.question}
                     </p>
                   </div>
